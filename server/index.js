@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const Flutterwave = require("flutterwave-node-v3");
 
 require("dotenv").config();
 
@@ -10,11 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* FLUTTERWAVE SETUP */
-const flw = new Flutterwave(
-  process.env.FLW_PUBLIC_KEY,
-  process.env.FLW_SECRET_KEY
-);
 
 /* ROOT */
 app.get("/", (req, res) => {
@@ -26,32 +20,37 @@ app.post("/create-checkout-session", async (req, res) => {
   try {
     const { amount, campaignTitle, email, name } = req.body;
 
-    const payload = {
-      tx_ref: "donation-" + Date.now(),
+    const response = await axios.post(
+      "https://api.flutterwave.com/v3/payments",
+      {
+        tx_ref: "donation-" + Date.now(),
 
-      amount: Number(amount),
+        amount: Number(amount),
 
-      currency: "NGN",
+        currency: "NGN",
 
-      redirect_url: `${process.env.CLIENT_URL}/success`,
+        redirect_url: `${process.env.CLIENT_URL}/success`,
 
-      customer: {
-        email: email || "donor@example.com",
-        name: name || "Anonymous Donor",
+        customer: {
+          email: email || "donor@example.com",
+          name: name || "Anonymous Donor",
+        },
+
+        customizations: {
+          title: campaignTitle || "Donation",
+          description: "Donation Payment",
+        },
       },
-
-      customizations: {
-        title: campaignTitle || "Donation",
-        description: "Donation Payment",
-      },
-    };
-
-    const response = await flw.PaymentLink.create(payload);
-
-    console.log(response);
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     res.json({
-      url: response.data.link,
+      url: response.data.data.link,
     });
 
   } catch (error) {
