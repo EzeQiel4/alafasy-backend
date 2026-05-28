@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 /* FLUTTERWAVE PAYMENT LINK */
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { amount, campaignTitle, email, name } = req.body;
+    const { amount, campaignTitle, email, name, currency } = req.body;
 
     const response = await axios.post(
       "https://api.flutterwave.com/v3/payments",
@@ -27,7 +27,7 @@ app.post("/create-checkout-session", async (req, res) => {
 
         amount: Number(amount),
 
-        currency: "NGN",
+        currency: currency || "USD",
 
         redirect_url: `${process.env.CLIENT_URL}/success`,
 
