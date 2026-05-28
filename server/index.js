@@ -26,8 +26,11 @@ app.post("/create-checkout-session", async (req, res) => {
   try {
     const { amount, campaignTitle, email, name } = req.body;
 
-    const response = await flw.Paymentlinks.create({
+    const payload = {
+      tx_ref: "tx-" + Date.now(),
+
       amount: Number(amount),
+
       currency: "NGN",
 
       redirect_url: `${process.env.CLIENT_URL}/success`,
@@ -41,7 +44,11 @@ app.post("/create-checkout-session", async (req, res) => {
         title: campaignTitle || "Donation",
         description: "Donation Payment",
       },
-    });
+    };
+
+    const response = await flw.Charge.create(payload);
+
+    console.log(response);
 
     res.json({
       url: response.data.link,
@@ -58,7 +65,6 @@ app.post("/create-checkout-session", async (req, res) => {
     });
   }
 });
-
 /* CREATE CRYPTO PAYMENT */
 app.post("/create-crypto-payment", async (req, res) => {
   try {
