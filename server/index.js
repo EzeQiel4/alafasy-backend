@@ -27,7 +27,7 @@ app.post("/create-checkout-session", async (req, res) => {
     const { amount, campaignTitle, email, name } = req.body;
 
     const payload = {
-      tx_ref: "tx-" + Date.now(),
+      tx_ref: "donation-" + Date.now(),
 
       amount: Number(amount),
 
@@ -46,7 +46,7 @@ app.post("/create-checkout-session", async (req, res) => {
       },
     };
 
-    const response = await flw.Charge.create(payload);
+    const response = await flw.PaymentLink.create(payload);
 
     console.log(response);
 
